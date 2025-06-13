@@ -28,6 +28,17 @@ class StockTradingEnv(gym.Env):
         sell_cost_pct (float, array): Cost for selling shares, each index corresponds to each asset
         turbulence_threshold (float): Maximum turbulence allowed in market for purchases to occur. If exceeded, positions are liquidated
         print_verbosity(int): When iterating (step), how often to print stats about state of env
+
+    A stock trading environment for OpenAI gym
+
+    Parameters:
+        df (pandas.DataFrame): 包含数据的DataFrame
+        hmax (int): 每次交易每个资产的最大现金交易量
+        initial_amount (int): 初始可用现金量
+        buy_cost_pct (float, array): 购买股票的成本，每个索引对应每个资产
+        sell_cost_pct (float, array): 出售股票的成本，每个索引对应每个资产
+        turbulence_threshold (float): 市场允许的最大波动阈值。如果超过，将清仓
+        print_verbosity(int): 在迭代(step)时，打印环境状态统计信息的频率
     """
 
     metadata = {"render.modes": ["human"]}
