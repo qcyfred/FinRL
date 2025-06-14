@@ -13,7 +13,6 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 class SignalTradingEnv(gym.Env):
     """A single stock signal trading environment for OpenAI gym with discrete actions
     
-    优化版本：解决了奖励机制、状态空间shift问题、命名混乱等问题
     """
 
     metadata = {"render.modes": ["human"]}
@@ -100,7 +99,7 @@ class SignalTradingEnv(gym.Env):
         self.trade_returns = []  # 每笔交易的收益率
         self.daily_returns = []
         
-        # 延迟风控指标（用于状态空间，避免shift问题）- 必须在_initiate_state之前初始化
+        # 必须在_initiate_state之前初始化
         self.lagged_risk_indicators = [0.0, 0.0, 0.0, 0.0]
         
         # 交易记录

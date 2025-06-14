@@ -40,19 +40,9 @@ def set_global_seed(seed=42):
 # 设置随机种子
 set_global_seed(42)
 
-# from meta import config
-# from meta.data_processor import DataProcessor
-# from main import check_and_make_directories
-# from meta.data_processors.tushare import Tushare, ReturnPlotter
 from finrl.meta.env_stock_trading.env_signal_trading import SignalTradingEnv
 from finrl.agents.stablebaselines3.models import DRLAgent
-# from meta.config import (
-#     DATA_SAVE_DIR,
-#     TRAINED_MODEL_DIR,
-#     TENSORBOARD_LOG_DIR,
-#     RESULTS_DIR,
-#     INDICATORS,
-# )
+
 
 import yaml
 
@@ -99,14 +89,6 @@ check_and_make_directories([TRAINED_MODEL_DIR, TENSORBOARD_LOG_DIR, RESULTS_DIR]
 
 # 单股票标的
 ticker_list = ["600000.SH"]  # 浦发银行作为测试标的
-
-# 奖励函数权重配置
-REWARD_WEIGHTS = {
-    'return': 1.0,        # 收益率权重
-    'sharpe': 0.2,        # 夏普比率权重
-    'max_drawdown': -1.0, # 最大回撤惩罚权重
-    'volatility': -0.1    # 波动率惩罚权重
-}
 
 print(f"训练期间: {TRAIN_START_DATE} 到 {TRAIN_END_DATE}")
 print(f"交易期间: {TRADE_START_DATE} 到 {TRADE_END_DATE}")
@@ -561,12 +543,31 @@ for model_name, model in trained_models.items():
         print(f"✗ 保存 {model_name} 模型失败: {e}")
 
 # 准备可序列化的结果数据（排除不可序列化的模型对象）
+def safe_date_range(df, time_col='time'):
+    """安全地获取日期范围，处理字符串和日期时间对象"""
+    if df.empty or time_col not in df.columns:
+        return []
+    
+    min_date = df[time_col].min()
+    max_date = df[time_col].max()
+    
+    # 如果已经是字符串，直接返回
+    if isinstance(min_date, str):
+        return [min_date, max_date]
+    
+    # 如果是日期时间对象，转换为字符串
+    try:
+        return [min_date.strftime('%Y-%m-%d'), max_date.strftime('%Y-%m-%d')]
+    except AttributeError:
+        # 如果无法转换，返回字符串表示
+        return [str(min_date), str(max_date)]
+
 serializable_results = {
     'performance_comparison': performance_comparison,
     'trade_data_info': {
         'shape': trade.shape if not trade.empty else (0, 0),
         'columns': trade.columns.tolist() if not trade.empty else [],
-        'date_range': [trade['time'].min(), trade['time'].max()] if not trade.empty and 'time' in trade.columns else [],
+        'date_range': safe_date_range(trade, 'time'),
         'stock_symbols': trade['tic'].unique().tolist() if not trade.empty and 'tic' in trade.columns else []
     },
     'env_kwargs': env_kwargs,
@@ -608,6 +609,10 @@ try:
             return float(obj)
         elif isinstance(obj, np.ndarray):
             return obj.tolist()
+        elif isinstance(obj, pd.Timestamp):
+            return obj.strftime('%Y-%m-%d %H:%M:%S')
+        elif hasattr(obj, 'isoformat'):  # 处理其他日期时间对象
+            return obj.isoformat()
         return obj
     
     # 递归转换
