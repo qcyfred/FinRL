@@ -1,0 +1,81 @@
+# 信号交易配置文件
+
+# 股票代码配置
+stock:
+  ticker: "600000.SH"
+
+# 数据路径配置
+data:
+  input_dir: "/Users/qinchaoyi/workspace/Ultron/code/AI4Fin/FinRL/data"
+  output_dir: "/Users/qinchaoyi/workspace/Ultron/code/AI4Fin/FinRL/data"
+  # processed_file: "filtered_regime2.csv"
+  processed_file: "dataset.csv"
+
+
+# 技术指标配置
+indicators:
+  basic:
+    # - "adx_14"
+    # - "cci_14"
+    # - "above_ma_120d"
+    # - "ma_20d_up"
+    - "macd"
+    - "boll_ub"
+    - "boll_lb"
+    - "rsi_30"
+    - "cci_30"
+    - "dx_30"
+    - "close_30_sma"
+    - "close_60_sma"
+    
+
+# 训练参数配置
+training:
+  train_start_date: "2015-01-01"
+  train_end_date: "2019-08-01"
+  trade_start_date: "2019-08-01"
+  trade_end_date: "2020-08-01"
+  
+  initial_amount: 1000000
+  buy_cost_pct: 0.00125
+  sell_cost_pct: 0.00125
+  
+  frequency: "1d"
+  
+  # 奖励配置
+  reward_config:
+    method: "information_ratio"
+    return_weight: 1.0
+    risk_penalty_weight: 0.5
+    trade_quality_weight: 0.1
+    final_reward_weight: 2.0
+    benchmark: "buy_hold"
+
+# 模型配置
+models:
+  PPO:
+    learning_rate: 0.0003
+    n_steps: 2048
+    batch_size: 64
+    n_epochs: 10
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_range: 0.2
+    ent_coef: 0.01
+  
+  A2C:
+    learning_rate: 0.0007
+    n_steps: 5
+    gamma: 0.99
+    gae_lambda: 1.0
+    ent_coef: 0.01
+    vf_coef: 0.25
+
+# 输出配置
+output:
+  results_dir: "results"
+  trained_model_dir: "trained_models"
+  tensorboard_log_dir: "tensorboard_logs"
+  print_verbosity: 10
+  make_plots: true
+  total_timesteps: 50000 
