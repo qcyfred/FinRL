@@ -7,6 +7,7 @@ import random
 import torch
 import os
 import pickle
+from datetime import datetime
 from IPython import display
 
 display.set_matplotlib_formats("svg")
@@ -41,7 +42,7 @@ def set_global_seed(seed):
 seed = 42
 set_global_seed(seed)
 
-from finrl.meta.env_stock_trading.env_signal_trading import SignalTradingEnv
+from scripts.env_signal_trading import SignalTradingEnv
 from finrl.agents.stablebaselines3.models import DRLAgent
 
 
@@ -52,6 +53,9 @@ config = load_config()
 
 print("所有模块导入完成!")
 
+# 创建基于时间戳的结果文件夹
+now_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+print(f"本次运行时间戳: {now_str}")
 
 # 从配置中获取参数
 STOCK_TICKER = config['stock']['ticker']
@@ -73,16 +77,19 @@ BUY_COST_PCT = config['training']['buy_cost_pct']
 SELL_COST_PCT = config['training']['sell_cost_pct']
 FREQUENCY = config['training']['frequency']
 
-# 输出目录
-RESULTS_DIR = config['output']['results_dir']
-TRAINED_MODEL_DIR = config['output']['trained_model_dir']
-TENSORBOARD_LOG_DIR = config['output']['tensorboard_log_dir']
+# 输出目录 - 使用时间戳创建子文件夹
+RESULTS_BASE_DIR = config['output']['results_base_dir']
+RESULTS_DIR = os.path.join(RESULTS_BASE_DIR, now_str)
+TRAINED_MODEL_DIR = os.path.join(RESULTS_DIR, config['output']['trained_model_dir'])
+TENSORBOARD_LOG_DIR = os.path.join(RESULTS_DIR, config['output']['tensorboard_log_dir'])
 PRINT_VERBOSITY = config['output']['print_verbosity']
 MAKE_PLOTS = config['output']['make_plots']
 TOTAL_TIMESTEPS = config['output']['total_timesteps']
 
 # 创建必要的文件夹
-check_and_make_directories([TRAINED_MODEL_DIR, TENSORBOARD_LOG_DIR, RESULTS_DIR])
+check_and_make_directories([RESULTS_DIR, TRAINED_MODEL_DIR, TENSORBOARD_LOG_DIR])
+
+print(f"结果将保存到: {RESULTS_DIR}")
 
 # ================================
 # 配置参数
@@ -144,6 +151,7 @@ env_kwargs = {
     "print_verbosity": 10,
     "reward_config": reward_config,
     "seed": 42,
+    "results_dir": RESULTS_DIR,  # 添加结果路径参数
 }
 
 # 创建训练环境
@@ -210,7 +218,7 @@ def train_signal_models():
             trained_model = agent.train_model(
                 model=model, 
                 tb_log_name=f"{model_name.lower()}_signal_trading", 
-                total_timesteps=50000
+                total_timesteps=TOTAL_TIMESTEPS
             )
             trained_models[model_name] = trained_model
             print(f"{model_name} 模型训练完成!")
