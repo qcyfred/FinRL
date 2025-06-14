@@ -8,8 +8,9 @@ stock:
 data:
   input_dir: "/Users/qinchaoyi/workspace/Ultron/code/AI4Fin/FinRL/data"
   output_dir: "/Users/qinchaoyi/workspace/Ultron/code/AI4Fin/FinRL/data"
-  # processed_file: "filtered_regime2.csv"
-  processed_file: "dataset.csv"
+  processed_file: "dataset_000905.XSHG_1d.csv"
+  # processed_file: "dataset.csv"
+  # processed_file: "dataset_000905.XSHG_5min_concated.csv"
 
 
 # 技术指标配置
@@ -19,6 +20,7 @@ indicators:
     # - "cci_14"
     # - "above_ma_120d"
     # - "ma_20d_up"
+
     - "macd"
     - "boll_ub"
     - "boll_lb"
@@ -32,13 +34,13 @@ indicators:
 # 训练参数配置
 training:
   train_start_date: "2015-01-01"
-  train_end_date: "2019-08-01"
-  trade_start_date: "2019-08-01"
-  trade_end_date: "2020-08-01"
+  train_end_date: "2019-12-31"
+  trade_start_date: "2020-01-01"
+  trade_end_date: "2025-06-13"
   
   initial_amount: 1000000
-  buy_cost_pct: 0.00125
-  sell_cost_pct: 0.00125
+  buy_cost_pct: 0.0005
+  sell_cost_pct: 0.0005
   
   frequency: "1d"
   
