@@ -26,7 +26,7 @@ def load_config(config_path="config.yaml"):
         config = yaml.safe_load(file)
     return config
 
-def set_global_seed(seed=42):
+def set_global_seed(seed):
     """设置全局随机种子以确保结果可复现"""
     random.seed(seed)
     np.random.seed(seed)
@@ -38,7 +38,8 @@ def set_global_seed(seed=42):
     os.environ['PYTHONHASHSEED'] = str(seed)
 
 # 设置随机种子
-set_global_seed(42)
+seed = 42
+set_global_seed(seed)
 
 from finrl.meta.env_stock_trading.env_signal_trading import SignalTradingEnv
 from finrl.agents.stablebaselines3.models import DRLAgent
@@ -128,23 +129,8 @@ print(f"股票数量: {len(train.tic.unique())}")
 # 环境设置
 # ================================
 
-# 改进的奖励配置
-reward_config_balanced = {
-    'method': 'information_ratio',  # 使用信息比率方法
-    'return_weight': 1.0,
-    'risk_penalty_weight': 0.5,
-    'trade_quality_weight': 0.1,
-    'final_reward_weight': 2.0,
-    'benchmark': 'buy_hold'
-}
-
-reward_config_multi_factor = {
-    'method': 'multi_factor',  # 使用多因子方法
-    'return_weight': 1.0,
-    'risk_penalty_weight': 0.8,
-    'trade_quality_weight': 0.15,
-    'final_reward_weight': 1.5,
-    'benchmark': 'buy_hold'
+reward_config = {
+    'return_weight': 0.01,
 }
 
 # 交易环境参数
@@ -156,8 +142,8 @@ env_kwargs = {
     "turbulence_threshold": None,
     "make_plots": True,
     "print_verbosity": 10,
-    "reward_config": reward_config_balanced,  # 使用新的reward_config
-    "random_seed": 42,
+    "reward_config": reward_config,
+    "seed": 42,
 }
 
 # 创建训练环境
@@ -220,7 +206,7 @@ def train_signal_models():
         agent = DRLAgent(env=env_train_fresh)
         
         try:
-            model = agent.get_model(model_name.lower(), model_kwargs=params, seed=42)
+            model = agent.get_model(model_name.lower(), model_kwargs=params, seed=seed)
             trained_model = agent.train_model(
                 model=model, 
                 tb_log_name=f"{model_name.lower()}_signal_trading", 
