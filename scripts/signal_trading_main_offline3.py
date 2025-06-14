@@ -75,7 +75,6 @@ TRADE_END_DATE = config['training']['trade_end_date']
 INITIAL_AMOUNT = config['training']['initial_amount']
 BUY_COST_PCT = config['training']['buy_cost_pct']
 SELL_COST_PCT = config['training']['sell_cost_pct']
-FREQUENCY = config['training']['frequency']
 
 # 输出目录 - 使用时间戳创建子文件夹
 RESULTS_BASE_DIR = config['output']['results_base_dir']
@@ -96,7 +95,7 @@ print(f"结果将保存到: {RESULTS_DIR}")
 # ================================
 
 # 单股票标的
-ticker_list = ["600000.SH"]  # 浦发银行作为测试标的
+ticker_list = [STOCK_TICKER]
 
 print(f"训练期间: {TRAIN_START_DATE} 到 {TRAIN_END_DATE}")
 print(f"交易期间: {TRADE_START_DATE} 到 {TRADE_END_DATE}")
@@ -137,14 +136,14 @@ print(f"股票数量: {len(train.tic.unique())}")
 # ================================
 
 reward_config = {
-    'return_weight': 0.01,
+    'return_weight': 1.0,
 }
 
 # 交易环境参数
 env_kwargs = {
-    "initial_amount": 1000000,
-    "buy_cost_pct": 1.25e-3,
-    "sell_cost_pct": 1.25e-3,
+    "initial_amount": INITIAL_AMOUNT,
+    "buy_cost_pct": BUY_COST_PCT,
+    "sell_cost_pct": SELL_COST_PCT,
     "tech_indicator_list": INDICATORS_OMK,
     "turbulence_threshold": None,
     "make_plots": True,
@@ -208,7 +207,7 @@ def train_signal_models():
         print(f"\n=== 训练 {model_name} 模型 ===")
         
         # 重新创建环境以避免状态干扰
-        e_train_fresh = SignalTradingEnv(df=train, **env_kwargs)
+        e_train_fresh = SignalTradingEnv(df=train, model_name=model_name, **env_kwargs)
         env_train_fresh, _ = e_train_fresh.get_sb_env()
         
         agent = DRLAgent(env=env_train_fresh)
@@ -259,7 +258,7 @@ def evaluate_model(model, model_name, trade_data):
     
     # 计算性能指标
     if not df_account_value.empty:
-        initial_value = env_kwargs["initial_amount"]
+        initial_value = INITIAL_AMOUNT
         final_value = df_account_value['account_value'].iloc[-1]
         total_return = (final_value - initial_value) / initial_value
         
@@ -339,7 +338,7 @@ def plot_net_value_comparison(all_results, trade_data, env_kwargs):
     # 准备基准数据（股票本身的净值曲线）
     if not trade_data.empty and 'close' in trade_data.columns:
         trade_dates = pd.to_datetime(trade_data['time'] if 'time' in trade_data.columns else trade_data['date'])
-        initial_amount = env_kwargs["initial_amount"]
+        initial_amount = INITIAL_AMOUNT
         
         # 计算可购买的股票数量（基于第一天的价格）
         initial_price = trade_data['close'].iloc[0]

@@ -8,6 +8,7 @@ from gym.utils import seeding
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from stable_baselines3.common.vec_env import DummyVecEnv
+import os
 
 
 class SignalTradingEnv(gym.Env):
@@ -52,7 +53,6 @@ class SignalTradingEnv(gym.Env):
         self.model_name = model_name
         self.mode = mode
         self.iteration = iteration
-        self.results_dir = results_dir
 
         # 改进的奖励配置
         self.reward_config = reward_config
@@ -106,6 +106,11 @@ class SignalTradingEnv(gym.Env):
 
         # 初始化状态 - 放在所有属性初始化之后
         self.state = self._initiate_state()
+
+        # 创建结果目录
+        if self.model_name and len(self.model_name) > 0:
+            self.results_dir = os.path.join(results_dir, self.model_name)
+            os.makedirs(self.results_dir, exist_ok=True)
 
     def _get_current_price(self):
         """获取当前股价"""
@@ -265,6 +270,9 @@ class SignalTradingEnv(gym.Env):
         # 更新下一个状态
         self.day += 1
         self.data = self.df.loc[self.day, :]
+
+        # print(f'self.day: {self.day}, current_dt: {self.data.time}')
+
         self.state = self._update_state()
 
         return self.state, self.immediate_reward, self.terminal, {}
@@ -314,6 +322,9 @@ class SignalTradingEnv(gym.Env):
             self.trades += 1
 
     def reset(self):
+
+        # print(f'reset self.day: {self.day}, current_dt: {self.data.time}')
+        
         # 重置所有变量
         self.day = 0
         self.data = self.df.loc[self.day, :]
