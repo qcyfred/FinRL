@@ -33,9 +33,9 @@ indicators:
 
 # 训练参数配置
 training:
-  train_start_date: "2015-01-01"
-  train_end_date: "2019-12-31"
-  trade_start_date: "2020-01-01"
+  train_start_date: "2017-01-01"
+  train_end_date: "2021-12-31"
+  trade_start_date: "2022-01-01"
   trade_end_date: "2025-06-13"
   
   initial_amount: 1000000
